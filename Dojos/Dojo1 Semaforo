@@ -1,0 +1,91 @@
+//DOJO 1 GRUPO C
+
+//Hago un define de los pines que voy a utilizar
+#define ROJO 13
+#define AMARILLO 12
+#define VERDE 11
+#define BUZZER 10
+  
+void setup()
+{
+  //Inicializo los pines como salida
+  pinMode(ROJO,OUTPUT);
+  pinMode(AMARILLO,OUTPUT);
+  pinMode(VERDE,OUTPUT);
+  pinMode(BUZZER,OUTPUT);
+  //Inicializo el puerto serie
+  Serial.begin(9600);
+}
+
+
+void loop()
+{
+  //Inicializo un contador para poder iterar el timbre
+  int segundos = 0;
+  
+  //Llamada a la funcion para prender el led Rojo, recibe como parametro el define del pin ROJO
+  prenderLedRojo(ROJO);
+  
+  //Hago una iteracion del timbre solo si los segundos acumulados son menor a 5
+  while(segundos < 5)
+  {
+    sonarTimbre(BUZZER);
+    sonarTimbre(BUZZER);
+    segundos ++;
+  }
+  
+  //Llamada a la funcion apagarLed, recibe como parametros,
+  //el define del pin ROJO y el delay de 1 segundo
+  apagarLed(ROJO,1000);
+  
+  //Llamada a las funciones prenderLed y apagarLed, que recibe como parametros
+  //el define del pin AMARILLO y el delay de 3 segundos
+  prenderLed(AMARILLO,3000);
+  apagarLed(AMARILLO,1000);
+  
+  //Llamada a las funciones prenderLed y apagarLed, que recibe como parametros
+  //el define del pin VERDE y el delay de 3 segundos
+  prenderLed(VERDE,5000);
+  apagarLed(VERDE,1000);
+  
+  //Llamada a las funciones prenderLed y apagarLed, que recibe como parametros
+  //el define del pin AMARILLO y el delay de 3 segundos
+  prenderLed(AMARILLO,3000);
+  apagarLed(AMARILLO,1000);
+
+}
+
+//Funcion que prende el led Rojo, recibe como parametro,
+//el pin del led que va a prender, en este caso el Rojo.
+void prenderLedRojo(int led)
+{
+  Serial.println("Prendo el led");
+  digitalWrite(led,HIGH);
+}  
+
+//Funcion que prende el resto de leds, recibe como parametros,
+//el pin del led que va a prender, y el tiempo del delay.
+void prenderLed(int led,int tiempo)
+{
+  Serial.println("Prendo el led");
+  digitalWrite(led,HIGH);
+  delay(tiempo);
+}
+
+//Funcion que apaga los leds, recibe como parametros,
+//el pin del led que va a prender, y el tiempo del delay.
+void apagarLed(int led,int tiempo)
+{
+  Serial.println("Apago el led");
+  digitalWrite(led,LOW);
+  delay(tiempo);
+}
+
+//Funcion que hace sonar el timbre, recibe como parametro
+//el pin del timbre.
+void sonarTimbre(int timbre)
+{
+  Serial.println("Suena el timbre");
+  tone(timbre,1500,250);
+  delay(500);
+}
