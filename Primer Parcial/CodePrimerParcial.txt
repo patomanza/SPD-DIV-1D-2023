@@ -1,0 +1,210 @@
+//Patricio Manzanares DIV D
+
+#define ROJO 13
+#define VERDE 12
+#define BOTON_SUBIR 7
+#define BOTON_PAUSA 6
+#define BOTON_BAJAR 5
+#define A 9
+#define B 8
+#define C A2
+#define D A1
+#define E A0
+#define F 10
+#define G 11
+
+int pisoActual = 0;
+bool subiendo = false;
+bool bajando = false;
+
+void setup()
+{
+  pinMode(ROJO, OUTPUT);
+  pinMode(VERDE, OUTPUT);
+
+  pinMode(BOTON_SUBIR, INPUT_PULLUP);
+  pinMode(BOTON_PAUSA, INPUT_PULLUP);
+  pinMode(BOTON_BAJAR, INPUT_PULLUP);
+
+  pinMode(A, OUTPUT);
+  pinMode(B, OUTPUT);
+  pinMode(C, OUTPUT);
+  pinMode(D, OUTPUT);
+  pinMode(E, OUTPUT);
+  pinMode(F, OUTPUT);
+  pinMode(G, OUTPUT);
+
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  int subir = digitalRead(BOTON_SUBIR);
+  int bajar = digitalRead(BOTON_BAJAR);
+  int pausa = digitalRead(BOTON_PAUSA);
+
+  if (subir == LOW && pisoActual == 9)
+  {
+    Serial.println("No puede subir más, solo bajar");
+  }
+  else if (subir == LOW && pisoActual < 9 && pisoActual >= 0)
+  {
+    subiendo = true;
+    bajando = false;
+    Serial.print("Se encuentra en el piso: ");
+    Serial.println(pisoActual);
+  }
+
+  if (bajar == LOW && pisoActual == 0)
+  {
+    Serial.println("No puede bajar más, solo subir");
+  }
+  else if (bajar == LOW && pisoActual >= 1 && pisoActual < 9)
+  {
+    subiendo = false;
+    bajando = true;
+    Serial.print("Se encuentra en el piso: ");
+    Serial.println(pisoActual);
+  }
+
+  if (pausa == LOW)
+  {
+    subiendo = false;
+    bajando = false;
+    Serial.println("Ejecución pausada");
+  }
+
+  if (subiendo)
+  {
+    subirPiso();
+    pisoActual++;
+  }
+
+  if (bajando)
+  {
+    bajarPiso();
+    pisoActual--;
+  }
+
+  actualizarDisplay(pisoActual);
+}
+
+void subirPiso()
+{
+  digitalWrite(VERDE, HIGH);
+  digitalWrite(ROJO, LOW);
+  
+  delay(3000); 
+  
+  digitalWrite(VERDE, LOW);
+  digitalWrite(ROJO, HIGH);
+}
+
+void bajarPiso()
+{
+  digitalWrite(VERDE, HIGH);
+  digitalWrite(ROJO, LOW);
+  
+  delay(3000);
+  
+  digitalWrite(VERDE, LOW);
+  digitalWrite(ROJO, HIGH);
+}
+
+void actualizarDisplay(int piso)
+{
+
+  switch(piso)
+  {
+    case 0:
+    	digitalWrite(A, HIGH);
+    	digitalWrite(B, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(D, HIGH);
+    	digitalWrite(E, HIGH);
+    	digitalWrite(F, HIGH);
+    	digitalWrite(G, LOW);
+    break;
+    case 1:
+    	digitalWrite(A, LOW);
+    	digitalWrite(B, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(D, LOW);
+    	digitalWrite(E, LOW);
+    	digitalWrite(F, LOW);
+    	digitalWrite(G, LOW);
+    break;
+    case 2:
+    	digitalWrite(A, HIGH);
+    	digitalWrite(B, HIGH);
+    	digitalWrite(G, HIGH);
+    	digitalWrite(E, HIGH);
+    	digitalWrite(D, HIGH);
+    	digitalWrite(F, LOW);
+    	digitalWrite(C, LOW);
+    break;
+    case 3:
+    	digitalWrite(A, HIGH);
+    	digitalWrite(B, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(D, HIGH);
+    	digitalWrite(G, HIGH);
+    	digitalWrite(F, LOW);
+    	digitalWrite(E, LOW);
+    break;
+    case 4:
+		digitalWrite(A, LOW);
+    	digitalWrite(G, HIGH);
+    	digitalWrite(F, HIGH);
+    	digitalWrite(B, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(E, LOW);
+   	 	digitalWrite(D, LOW);
+    break;
+    case 5:
+    	digitalWrite(A, HIGH);
+    	digitalWrite(F, HIGH);
+    	digitalWrite(G, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(D, HIGH);
+    	digitalWrite(B, LOW);
+    	digitalWrite(E, LOW);
+    break;
+    case 6:
+    	digitalWrite(A, HIGH);
+    	digitalWrite(F, HIGH);
+    	digitalWrite(G, HIGH);
+    	digitalWrite(E, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(D, HIGH);
+    	digitalWrite(B, LOW);
+    break;
+    case 7:
+    	digitalWrite(A, HIGH);
+    	digitalWrite(B, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(D, LOW);
+    	digitalWrite(E, LOW);
+    	digitalWrite(F, LOW);
+    	digitalWrite(G, LOW);
+    break;
+    case 8:
+    	digitalWrite(G, HIGH);
+    	digitalWrite(A, HIGH);
+    	digitalWrite(B, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(D, HIGH);
+    	digitalWrite(E, HIGH);
+    	digitalWrite(F, HIGH);
+    break;
+    case 9:
+    	digitalWrite(G, HIGH);
+    	digitalWrite(A, HIGH);
+    	digitalWrite(B, HIGH);
+    	digitalWrite(C, HIGH);
+    	digitalWrite(D, HIGH);
+    	digitalWrite(F, HIGH);
+    	digitalWrite(E, LOW);
+    break;
+  }	
+}
