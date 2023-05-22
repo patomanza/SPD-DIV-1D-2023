@@ -1,5 +1,8 @@
 //Patricio Manzanares DIV D
 
+
+#include <Servo.h>
+
 #define ROJO 13
 #define VERDE 12
 #define BOTON_SUBIR 7
@@ -13,14 +16,21 @@
 #define F 10
 #define G 11
 
+Servo miServo;
+
 int pisoActual = 0;
 bool subiendo = false;
 bool bajando = false;
+
+int anguloDefault = 0;
+int fotodiodoValue = 0;
+int forceSensor;
 
 void setup()
 {
   pinMode(ROJO, OUTPUT);
   pinMode(VERDE, OUTPUT);
+  pinMode(A4, INPUT);
 
   pinMode(BOTON_SUBIR, INPUT_PULLUP);
   pinMode(BOTON_PAUSA, INPUT_PULLUP);
@@ -33,6 +43,9 @@ void setup()
   pinMode(E, OUTPUT);
   pinMode(F, OUTPUT);
   pinMode(G, OUTPUT);
+  
+  miServo.attach(A3);
+  miServo.write(anguloDefault);
 
   Serial.begin(9600);
 }
@@ -42,29 +55,42 @@ void loop()
   int subir = digitalRead(BOTON_SUBIR);
   int bajar = digitalRead(BOTON_BAJAR);
   int pausa = digitalRead(BOTON_PAUSA);
-
+	
+  forceSensor = analogRead(A5);
+  
   if (subir == LOW && pisoActual == 9)
   {
     Serial.println("No puede subir más, solo bajar");
   }
   else if (subir == LOW && pisoActual < 9 && pisoActual >= 0)
   {
-    subiendo = true;
-    bajando = false;
-    Serial.print("Se encuentra en el piso: ");
-    Serial.println(pisoActual);
+    //si la lectura del sensor de fuerza es mayor a 500, sube.
+    if(forceSensor > 500)
+    {
+    	subiendo = true;
+    	bajando = false;
+    	Serial.print("Se encuentra en el piso: ");
+   		Serial.println(pisoActual);
+      	Serial.print("Puede subir y bajar, peso optimo.");
+    }
   }
-
+  	
+	
   if (bajar == LOW && pisoActual == 0)
   {
     Serial.println("No puede bajar más, solo subir");
   }
   else if (bajar == LOW && pisoActual >= 1 && pisoActual < 9)
   {
-    subiendo = false;
-    bajando = true;
-    Serial.print("Se encuentra en el piso: ");
-    Serial.println(pisoActual);
+    //Si la lectura del sensor de fuerza es menor a 500, no baja.
+    if(forceSensor < 500)
+    {
+    	subiendo = true;
+    	bajando = false;
+    	Serial.print("Se encuentra en el piso: ");
+   		Serial.println(pisoActual);
+      	Serial.print("No puede subir ni bajar, peso muy bajo.");
+    }
   }
 
   if (pausa == LOW)
@@ -87,17 +113,21 @@ void loop()
   }
 
   actualizarDisplay(pisoActual);
+  
+  moverServo();
+  
 }
 
 void subirPiso()
 {
   digitalWrite(VERDE, HIGH);
   digitalWrite(ROJO, LOW);
-  
+    
   delay(3000); 
   
   digitalWrite(VERDE, LOW);
   digitalWrite(ROJO, HIGH);
+  
 }
 
 void bajarPiso()
@@ -207,4 +237,19 @@ void actualizarDisplay(int piso)
     	digitalWrite(E, LOW);
     break;
   }	
+}
+//Si la lectura del fotodiodo es mayor a 70, mueve el servo en 180°
+//Si es menor a 70 lo mueve a 90°
+void moverServo()
+{
+  fotodiodoValue = analogRead(4);
+  
+  if(fotodiodoValue >= 70)
+  {
+    miServo.write(180);
+  }
+  else
+  {
+    miServo.write(90);
+  }
 }
