@@ -1,0 +1,250 @@
+//Patricio Manzanares DIV 1D
+#include <LiquidCrystal.h>
+#include <Servo.h>
+#include <IRremote.h>
+
+#define INFRAROJO 11
+#define SENSOR A0
+#define VERDE 7
+#define ROJO 8
+#define Tecla_1 0xEF10BF00   
+#define Tecla_2 0xEE11BF00 
+
+
+int  ReceptorIR = 11;
+bool teclaPresionada = false;
+
+
+//El 1 representa la estacion primavera
+int temporada = 1;
+
+
+
+
+LiquidCrystal miLCD(0,1,2,3,4,5);
+Servo miServo;
+
+
+void setup()
+{
+  miLCD.begin(16,2);
+  pinMode(ROJO,OUTPUT);
+  pinMode(VERDE, OUTPUT);
+  pinMode(A0,INPUT);
+  miServo.attach(6);
+  miServo.write(0);
+  IrReceiver.begin(ReceptorIR, DISABLE_LED_FEEDBACK);
+}
+
+void loop() 
+{
+  int temperatura = lecturaTemperatura(SENSOR);
+  if (IrReceiver.decode()) 
+  {
+    if (IrReceiver.decodedIRData.decodedRawData == Tecla_1) 
+    {
+      miLCD.clear();
+      teclaPresionada = true;
+      miLCD.display();
+      mensajesDisplay(temperatura);
+    }
+    else if (IrReceiver.decodedIRData.decodedRawData == Tecla_2) 
+    {
+      miLCD.clear();
+      miLCD.noDisplay();
+      digitalWrite(VERDE, LOW);
+      digitalWrite(ROJO, LOW);
+      teclaPresionada = false; // Reiniciar el estado de la tecla
+    }
+    IrReceiver.resume();
+  }
+
+  if (teclaPresionada)
+  {
+   
+    miLCD.display();
+    mensajesDisplay(temperatura);
+  }
+}
+
+int lecturaTemperatura(int sensor)
+{
+ int lecturaTemp = analogRead(sensor);
+ lecturaTemp = map(lecturaTemp,20,358,-40,125);
+  
+ 
+  return lecturaTemp;
+}
+
+void mensajesDisplay(int temperatura)
+{
+  
+  if(temperatura > 26 && temperatura < 40)
+  {
+    miLCD.setCursor(0,0);
+  	miLCD.print("Temperatura:");
+  	miLCD.print(temperatura);
+  	miLCD.setCursor(14,0);
+  	miLCD.print(char(178));
+  	miLCD.print("C°");
+  
+  	if(temporada != 2)
+    {
+      miLCD.clear();
+    }
+    
+    miLCD.setCursor(0,1);
+    miLCD.print("Verano");
+  
+    temporada = 2;//El 2 representa la estacion de verano
+    
+    digitalWrite(VERDE, HIGH);
+  }
+  else if(temperatura < 26 && temperatura > 18)
+  {
+    digitalWrite(ROJO,LOW);
+    digitalWrite(VERDE,HIGH);
+    
+    miLCD.setCursor(0,0);
+  	miLCD.print("Temperatura:");
+  	miLCD.print(temperatura);
+  	miLCD.setCursor(14,0);
+  	miLCD.print(char(178));
+  	miLCD.print("C°");
+    
+    if(temporada !=1)
+    {
+      miLCD.clear();
+    }
+    
+    miLCD.setCursor(0,1);
+    miLCD.print("Primavera");
+    
+    temporada = 1;
+  
+  }
+  else if(temperatura < 18 && temperatura > 10)
+  {
+    digitalWrite(ROJO,LOW);
+    digitalWrite(VERDE,HIGH);
+    
+    miLCD.setCursor(0,0);
+  	miLCD.print("Temperatura:");
+  	miLCD.print(temperatura);
+  	miLCD.setCursor(14,0);
+  	miLCD.print(char(178));
+  	miLCD.print("C°");
+    
+    if(temporada != 3)
+    {
+      miLCD.clear();
+    }
+    
+    miLCD.setCursor(0,1);
+    miLCD.print("Otonio");
+    
+    temporada =3;//El 3 representa la estacion de otoño
+    
+  }
+  else if(temperatura < 10)
+  {
+    digitalWrite(ROJO,LOW);
+    digitalWrite(VERDE,HIGH);
+    
+    miLCD.setCursor(0,0);
+  	miLCD.print("Temperatura:");
+  	miLCD.print(temperatura);
+  	miLCD.setCursor(15,0);
+  	miLCD.print("C°");
+   	
+    if (temporada != 4)
+    {
+      miLCD.clear();
+    }
+    
+    miLCD.setCursor(0,1);
+    miLCD.print("Invierno");
+    
+    temporada = 4;//El 4 representa la estacion de invierno
+   
+  }
+  else if( temperatura > 80)
+  {
+    digitalWrite(VERDE,LOW);
+    digitalWrite(ROJO, HIGH);
+    
+    if(temporada != 5)
+    {
+     miLCD.clear(); 
+    }
+    
+    miLCD.setCursor(0,0);
+    miLCD.print("ALARMA INCENDIO");
+    
+    moverServo();
+    
+    temporada = 5;//El 5 representa el estado de alarma
+  
+  }
+  else
+  {
+    digitalWrite(ROJO,LOW);
+    digitalWrite(VERDE,HIGH);
+    
+    if(temporada != 6)
+    {
+      miLCD.clear();
+    }
+    
+    miLCD.setCursor(0,0);
+  	miLCD.print("Temperatura:");
+  	miLCD.print(temperatura);
+  	miLCD.setCursor(14,0);
+  	miLCD.print(char(178));
+  	miLCD.print("C°");
+    
+    temporada = 6;//El 6 representa un umbral que no estadefino para niguna estacion ni incendio.
+  }
+}
+
+void moverServo()
+{
+   miServo.write(180);
+    delay(1000);
+    miServo.write(0);
+    delay(1000);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
